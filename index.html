@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TikTok Shop Excel Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #000000 0%, #434343 100%);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 30px 20px;
+        }
+
+        .section {
+            margin-bottom: 25px;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .icon {
+            font-size: 20px;
+        }
+
+        .file-upload {
+            border: 2px dashed #667eea;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            background: #f8f9ff;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .file-upload:hover {
+            border-color: #764ba2;
+            background: #f0f1ff;
+        }
+
+        .file-upload.has-file {
+            border-color: #10b981;
+            background: #f0fdf4;
+        }
+
+        .file-upload input {
+            display: none;
+        }
+
+        .file-label {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .file-name {
+            font-size: 13px;
+            color: #10b981;
+            margin-top: 8px;
+            font-weight: 500;
+        }
+
+        .generate-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .generate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+        }
+
+        .generate-btn:active {
+            transform: translateY(0);
+        }
+
+        .generate-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .status.success {
+            background: #f0fdf4;
+            border: 1px solid #10b981;
+            color: #065f46;
+            display: block;
+        }
+
+        .status.error {
+            background: #fef2f2;
+            border: 1px solid #ef4444;
+            color: #991b1b;
+            display: block;
+        }
+
+        .status.info {
+            background: #eff6ff;
+            border: 1px solid #3b82f6;
+            color: #1e40af;
+            display: block;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .footer {
+            padding: 20px;
+            text-align: center;
+            background: #f8f9fa;
+            color: #666;
+            font-size: 12px;
+        }
+
+        .info-box {
+            background: #fff7ed;
+            border: 1px solid #fb923c;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .info-box h3 {
+            font-size: 14px;
+            color: #9a3412;
+            margin-bottom: 8px;
+        }
+
+        .info-box ul {
+            font-size: 13px;
+            color: #7c2d12;
+            margin-left: 20px;
+        }
+
+        .info-box li {
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🛍️ TikTok Shop Generator</h1>
+            <p>Generador automático de Excel para carga masiva</p>
+        </div>
+
+        <div class="content">
+            <div class="info-box">
+                <h3>⚠️ Importante: Archivos requeridos</h3>
+                <ul>
+                    <li><strong>master.xlsx</strong> - Catálogo de productos</li>
+                    <li><strong>tiktok_template.xlsx</strong> - Plantilla oficial TikTok</li>
+                </ul>
+            </div>
+
+            <div class="section">
+                <div class="section-title">
+                    <span class="icon">📊</span>
+                    Catálogo de productos (master.xlsx)
+                </div>
+                <label class="file-upload" id="masterUpload">
+                    <input type="file" id="masterFile" accept=".xlsx,.xls">
+                    <div class="file-label">📁 Toca para seleccionar master.xlsx</div>
+                    <div class="file-name" id="masterFileName"></div>
+                </label>
+            </div>
+
+            <div class="section">
+                <div class="section-title">
+                    <span class="icon">📋</span>
+                    Plantilla TikTok (tiktok_template.xlsx)
+                </div>
+                <label class="file-upload" id="templateUpload">
+                    <input type="file" id="templateFile" accept=".xlsx,.xls">
+                    <div class="file-label">📁 Toca para seleccionar tiktok_template.xlsx</div>
+                    <div class="file-name" id="templateFileName"></div>
+                </label>
+            </div>
+
+            <div class="section">
+                <button class="generate-btn" id="generateBtn" disabled>
+                    ✨ Generar Excel para TikTok Shop
+                </button>
+            </div>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Procesando productos...</p>
+            </div>
+
+            <div class="status" id="status"></div>
+        </div>
+
+        <div class="footer">
+            Fundición Alex © 2025<br>
+            Versión 1.0 - Compatible con TikTok Shop
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script>
+        // Configuración (equivalente a config.json)
+        const CONFIG = {
+            brand: "Fundición Alex",
+            currency: "MXN",
+            defaults: {
+                stock: 50,
+                peso_kg: 0.35,
+                largo_cm: 18,
+                ancho_cm: 18,
+                alto_cm: 6
+            },
+            limits: {
+                title_max_len: 80,
+                desc_max_len: 3000
+            },
+            output_start_row: 6,
+            default_category: "Hogar y cocina/Utensilios para hornear",
+            template_columns: {
+                category: "category",
+                sku: "seller_sku",
+                title: "product_name",
+                description: "product_description",
+                price: "price",
+                stock: "quantity",
+                brand: "brand",
+                weight: "parcel_weight",
+                length: "parcel_length",
+                width: "parcel_width",
+                height: "parcel_height",
+                image1: "main_image",
+                image2: "image_2",
+                image3: "image_3",
+                image4: "image_4",
+                image5: "image_5",
+                image6: "image_6",
+                image7: "image_7",
+                image8: "image_8",
+                image9: "image_9"
+            }
+        };
+
+        // Template de descripción
+        const DESC_TEMPLATE = `🔥 PROMO INICIO 2026 🔥
+¿Quieres buñuelos más parejos y crujientes? Este molde de aluminio fundido está hecho para durar.
+
+✅ ¿Por qué se nota la diferencia?
+• Aluminio fundido (más grueso) → retiene mejor el calor
+• Cocción más pareja → menos buñuelo grasoso
+• Superficie lisa → más higiénico y fácil de lavar
+
+📌 Modelo: {modelo}
+{tamanio}{incluye}
+{caracteristicas}
+🧽 Cuidados:
+• Lava y seca después de usar
+• Evita fibra metálica
+
+🇲🇽 Hecho en México · acabado a mano.`;
+
+        let masterWorkbook = null;
+        let templateWorkbook = null;
+
+        // Manejadores de archivos
+        document.getElementById('masterFile').addEventListener('change', function(e) {
+            handleFileUpload(e, 'master');
+        });
+
+        document.getElementById('templateFile').addEventListener('change', function(e) {
+            handleFileUpload(e, 'template');
+        });
+
+        function handleFileUpload(e, type) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                const data = new Uint8Array(evt.target.result);
+                const workbook = XLSX.read(data, {type: 'array'});
+
+                if (type === 'master') {
+                    masterWorkbook = workbook;
+                    document.getElementById('masterFileName').textContent = `✓ ${file.name}`;
+                    document.getElementById('masterUpload').classList.add('has-file');
+                } else {
+                    templateWorkbook = workbook;
+                    document.getElementById('templateFileName').textContent = `✓ ${file.name}`;
+                    document.getElementById('templateUpload').classList.add('has-file');
+                }
+
+                checkFilesReady();
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function checkFilesReady() {
+            const btn = document.getElementById('generateBtn');
+            if (masterWorkbook && templateWorkbook) {
+                btn.disabled = false;
+            }
+        }
+
+        document.getElementById('generateBtn').addEventListener('click', generateExcel);
+
+        function generateExcel() {
+            try {
+                showStatus('info', '⏳ Procesando productos...');
+                document.getElementById('loading').classList.add('active');
+                document.getElementById('generateBtn').disabled = true;
+
+                setTimeout(() => {
+                    try {
+                        const result = processFiles();
+                        document.getElementById('loading').classList.remove('active');
+                        showStatus('success', `🎉 ¡Listo! Generado con ${result.count} productos. Descargando...`);
+                        document.getElementById('generateBtn').disabled = false;
+                    } catch (error) {
+                        document.getElementById('loading').classList.remove('active');
+                        showStatus('error', `❌ Error: ${error.message}`);
+                        document.getElementById('generateBtn').disabled = false;
+                    }
+                }, 500);
+
+            } catch (error) {
+                showStatus('error', `❌ Error: ${error.message}`);
+                document.getElementById('generateBtn').disabled = false;
+            }
+        }
+
+        function processFiles() {
+            // Leer productos del master
+            const masterSheet = masterWorkbook.Sheets[masterWorkbook.SheetNames[0]];
+            const masterData = XLSX.utils.sheet_to_json(masterSheet);
+
+            if (masterData.length === 0) {
+                throw new Error('El archivo master.xlsx está vacío');
+            }
+
+            // Validar productos
+            const products = validateProducts(masterData);
+
+            // Procesar template
+            const templateSheet = templateWorkbook.Sheets[templateWorkbook.SheetNames[0]];
+            const templateData = XLSX.utils.sheet_to_json(templateSheet, {header: 1});
+
+            // Obtener headers del template (fila 1)
+            const headers = templateData[0];
+            const columnMap = mapColumns(headers);
+
+            // Crear nuevo workbook con productos
+            const outputData = [...templateData.slice(0, CONFIG.output_start_row - 1)];
+
+            // Agregar productos
+            products.forEach(product => {
+                const row = createProductRow(product, columnMap, headers);
+                outputData.push(row);
+            });
+
+            // Crear archivo final
+            const ws = XLSX.utils.aoa_to_sheet(outputData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Products");
+
+            // Descargar
+            XLSX.writeFile(wb, "tiktok_bulk_ready.xlsx");
+
+            return { count: products.length };
+        }
+
+        function validateProducts(data) {
+            const products = [];
+            const skus = new Set();
+
+            data.forEach((row, idx) => {
+                // Validar SKU
+                if (!row.sku) {
+                    throw new Error(`Fila ${idx + 2}: Producto sin SKU`);
+                }
+
+                const sku = String(row.sku).trim();
+                if (sku.includes(' ')) {
+                    throw new Error(`SKU '${sku}' contiene espacios`);
+                }
+
+                if (skus.has(sku)) {
+                    throw new Error(`SKU duplicado: ${sku}`);
+                }
+                skus.add(sku);
+
+                // Validar campos obligatorios
+                if (!row.modelo) throw new Error(`SKU ${sku}: falta 'modelo'`);
+                if (!row.coleccion) throw new Error(`SKU ${sku}: falta 'coleccion'`);
+                if (!row.precio_menudeo) throw new Error(`SKU ${sku}: falta 'precio_menudeo'`);
+
+                const precio = parseFloat(row.precio_menudeo);
+                if (isNaN(precio) || precio <= 0) {
+                    throw new Error(`SKU ${sku}: precio inválido`);
+                }
+
+                products.push(row);
+            });
+
+            return products;
+        }
+
+        function mapColumns(headers) {
+            const map = {};
+            headers.forEach((header, idx) => {
+                for (const [key, colName] of Object.entries(CONFIG.template_columns)) {
+                    if (header === colName) {
+                        map[key] = idx;
+                    }
+                }
+            });
+            return map;
+        }
+
+        function createProductRow(product, columnMap, headers) {
+            const row = new Array(headers.length).fill('');
+
+            // SKU
+            if (columnMap.sku !== undefined) {
+                row[columnMap.sku] = String(product.sku).trim();
+            }
+
+            // Categoría
+            if (columnMap.category !== undefined) {
+                row[columnMap.category] = product.category || CONFIG.default_category;
+            }
+
+            // Título
+            if (columnMap.title !== undefined) {
+                let title = `${product.modelo} ${product.coleccion}`;
+                if (title.length > CONFIG.limits.title_max_len) {
+                    title = title.substring(0, CONFIG.limits.title_max_len);
+                }
+                row[columnMap.title] = title;
+            }
+
+            // Descripción
+            if (columnMap.description !== undefined) {
+                row[columnMap.description] = generateDescription(product);
+            }
+
+            // Precio (EXACTAMENTE precio_menudeo)
+            if (columnMap.price !== undefined) {
+                row[columnMap.price] = parseFloat(product.precio_menudeo);
+            }
+
+            // Stock
+            if (columnMap.stock !== undefined) {
+                row[columnMap.stock] = product.stock || CONFIG.defaults.stock;
+            }
+
+            // Marca
+            if (columnMap.brand !== undefined) {
+                row[columnMap.brand] = CONFIG.brand;
+            }
+
+            // Dimensiones
+            if (columnMap.weight !== undefined) {
+                row[columnMap.weight] = product.peso_kg || CONFIG.defaults.peso_kg;
+            }
+            if (columnMap.length !== undefined) {
+                row[columnMap.length] = product.largo_cm || CONFIG.defaults.largo_cm;
+            }
+            if (columnMap.width !== undefined) {
+                row[columnMap.width] = product.ancho_cm || CONFIG.defaults.ancho_cm;
+            }
+            if (columnMap.height !== undefined) {
+                row[columnMap.height] = product.alto_cm || CONFIG.defaults.alto_cm;
+            }
+
+            // Imágenes
+            for (let i = 1; i <= 9; i++) {
+                const key = `image${i}`;
+                if (columnMap[key] !== undefined) {
+                    const imageField = `image_${i}`;
+                    if (product[imageField]) {
+                        row[columnMap[key]] = product[imageField];
+                    }
+                }
+            }
+
+            return row;
+        }
+
+        function generateDescription(product) {
+            let desc = DESC_TEMPLATE;
+            desc = desc.replace('{modelo}', product.modelo);
+            
+            let tamanio = product.tamanio ? `\n📏 Tamaño: ${product.tamanio}` : '';
+            let incluye = product.incluye ? `\n📦 Incluye: ${product.incluye}` : '';
+            
+            desc = desc.replace('{tamanio}', tamanio);
+            desc = desc.replace('{incluye}', incluye);
+
+            let caracteristicas = '';
+            if (product.caracteristicas) {
+                const items = String(product.caracteristicas).split(/[;\n]/).filter(x => x.trim());
+                if (items.length > 0) {
+                    caracteristicas = '\n⭐ Lo especial de este modelo:\n';
+                    items.forEach(item => {
+                        caracteristicas += `• ${item.trim()}\n`;
+                    });
+                }
+            }
+            desc = desc.replace('{caracteristicas}', caracteristicas);
+
+            if (desc.length > CONFIG.limits.desc_max_len) {
+                desc = desc.substring(0, CONFIG.limits.desc_max_len - 1) + '…';
+            }
+
+            return desc;
+        }
+
+        function showStatus(type, message) {
+            const status = document.getElementById('status');
+            status.className = `status ${type}`;
+            status.textContent = message;
+        }
+    </script>
+</body>
+</html>
